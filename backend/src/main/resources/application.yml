@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: oms-slcm-backend
+
+  datasource:
+    url: jdbc:sqlite:${DB_PATH:./data/oms_slcm.db}
+    driver-class-name: org.sqlite.JDBC
+    hikari:
+      # SQLite is a file-based, single-writer database. A pool size > 1 causes
+      # "database is locked" errors under concurrent writes from async/scheduled
+      # tasks, so we deliberately cap the pool at a single connection.
+      maximum-pool-size: 1
+      connection-timeout: 30000
+      pool-name: SQLiteHikariPool
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: false
+
+  jackson:
+    default-property-inclusion: non_null
+
+server:
+  port: 8080
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+logging:
+  level:
+    com.melih.omsslcm: DEBUG
