@@ -23,7 +23,7 @@
              JDK is 23, which needs a newer Lombok build for annotation processing
              to actually run (older versions fail silently, producing "cannot find
              symbol" for generated builder()/getter methods with no lombok error). -->
-        <lombok.version>1.18.34</lombok.version>
+        <lombok.version>1.18.36</lombok.version>
         <springdoc.version>2.6.0</springdoc.version>
         <sqlite-jdbc.version>3.46.1.3</sqlite-jdbc.version>
         <hibernate-community-dialects.version>6.5.2.Final</hibernate-community-dialects.version>
@@ -87,6 +87,23 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <!-- Explicit processor path: javac on newer JDKs no longer reliably
+                         auto-discovers annotation processors from the plain -classpath,
+                         which made Lombok silently produce no generated code (no error,
+                         just "cannot find symbol" for builder()/getters everywhere). -->
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
         </plugins>
