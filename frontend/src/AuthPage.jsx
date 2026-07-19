@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import { api, setToken } from './api'
+import { useLanguage } from './i18n'
+import LanguageSwitcher from './LanguageSwitcher'
 
 export default function AuthPage({ onAuthenticated }) {
+  const { t, translateApiMessage } = useLanguage()
   const [mode, setMode] = useState('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -20,7 +23,7 @@ export default function AuthPage({ onAuthenticated }) {
       setToken(token)
       onAuthenticated()
     } catch (err) {
-      setError(err.message)
+      setError(translateApiMessage(err.message))
     } finally {
       setLoading(false)
     }
@@ -28,27 +31,28 @@ export default function AuthPage({ onAuthenticated }) {
 
   return (
     <div className="auth-page">
+      <LanguageSwitcher />
       <form className="auth-card" onSubmit={handleSubmit}>
-        <h1>OMS/SLCM Simulasyonu</h1>
+        <h1>{t('appTitle')}</h1>
         <div className="auth-tabs">
           <button
             type="button"
             className={mode === 'signin' ? 'active' : ''}
             onClick={() => setMode('signin')}
           >
-            Giriş Yap
+            {t('signIn')}
           </button>
           <button
             type="button"
             className={mode === 'signup' ? 'active' : ''}
             onClick={() => setMode('signup')}
           >
-            Kayıt Ol
+            {t('signUp')}
           </button>
         </div>
 
         <label>
-          E-posta
+          {t('email')}
           <input
             type="email"
             value={email}
@@ -57,7 +61,7 @@ export default function AuthPage({ onAuthenticated }) {
           />
         </label>
         <label>
-          Şifre
+          {t('password')}
           <input
             type="password"
             value={password}
@@ -70,7 +74,7 @@ export default function AuthPage({ onAuthenticated }) {
         {error && <p className="error">{error}</p>}
 
         <button type="submit" className="primary" disabled={loading}>
-          {loading ? 'Bekleyin...' : mode === 'signin' ? 'Giriş Yap' : 'Kayıt Ol ve Giriş Yap'}
+          {loading ? t('pleaseWait') : mode === 'signin' ? t('signIn') : t('signUpAndSignIn')}
         </button>
       </form>
     </div>

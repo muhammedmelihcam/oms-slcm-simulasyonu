@@ -1,6 +1,7 @@
 /* Auth screen (EKRAN 0) */
 
 .auth-page {
+  position: relative;
   min-height: 100svh;
   display: flex;
   align-items: center;
@@ -129,6 +130,12 @@ button.primary:disabled {
   color: var(--text);
   cursor: pointer;
   font: inherit;
+}
+
+.dashboard-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .dashboard-body {
@@ -272,4 +279,36 @@ button.primary:disabled {
   font-family: var(--mono);
   font-size: 12px;
   color: var(--text);
+}
+
+/* Language switcher (TR/EN) - top-right on the auth page, in the dashboard
+   header actions. Comes after .dashboard-header button in the stylesheet so
+   it wins on equal selector specificity. */
+.auth-page > .language-switcher {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
+
+.language-switcher {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.language-switcher button {
+  padding: 6px 10px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.language-switcher button.active {
+  background: var(--accent);
+  color: #fff;
 }

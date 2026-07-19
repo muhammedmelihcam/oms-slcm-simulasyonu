@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { api, clearToken } from './api'
+import { useLanguage } from './i18n'
+import LanguageSwitcher from './LanguageSwitcher'
 
 const ORDER_STEPS = ['PENDING', 'VALIDATING', 'PROVISIONING', 'COMPLETED']
 const POLL_INTERVAL_MS = 2000
@@ -21,6 +23,9 @@ function buildTimeline(status) {
 }
 
 export default function Dashboard({ onLogout }) {
+  const { t, translateStatus, translateSegment, translateSubscriberStatus, translateReason, translateApiMessage } =
+    useLanguage()
+
   const [msisdn, setMsisdn] = useState('')
   const [eligibility, setEligibility] = useState(null)
   const [eligibilityError, setEligibilityError] = useState(null)
@@ -36,8 +41,9 @@ export default function Dashboard({ onLogout }) {
   useEffect(() => {
     api.listProducts()
       .then(setProducts)
-      .catch((err) => setProductsError(err.message))
+      .catch((err) => setProductsError(translateApiMessage(err.message)))
     return () => clearInterval(pollRef.current)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function checkEligibility(e) {
@@ -48,7 +54,7 @@ export default function Dashboard({ onLogout }) {
     try {
       setEligibility(await api.getEligibility(msisdn))
     } catch (err) {
-      setEligibilityError(err.message)
+      setEligibilityError(translateApiMessage(err.message))
     } finally {
       setEligibilityLoading(false)
     }
@@ -56,7 +62,7 @@ export default function Dashboard({ onLogout }) {
 
   async function placeOrder(productCode) {
     if (!msisdn) {
-      setOrderError('Önce sol taraftan bir MSISDN girin.')
+      setOrderError(t('enterMsisdnFirst'))
       return
     }
     setOrderError(null)
@@ -73,11 +79,11 @@ export default function Dashboard({ onLogout }) {
           }
         } catch (err) {
           clearInterval(pollRef.current)
-          setOrderError(err.message)
+          setOrderError(translateApiMessage(err.message))
         }
       }, POLL_INTERVAL_MS)
     } catch (err) {
-      setOrderError(err.message)
+      setOrderError(translateApiMessage(err.message))
     }
   }
 
@@ -90,62 +96,71 @@ export default function Dashboard({ onLogout }) {
   return (
     <div className="dashboard">
       <header className="dashboard-header">
-        <h1>OMS/SLCM Simulasyonu</h1>
-        <button type="button" onClick={handleLogout}>Çıkış Yap</button>
+        <h1>{t('appTitle')}</h1>
+        <div className="dashboard-header-actions">
+          <LanguageSwitcher />
+          <button type="button" onClick={handleLogout}>
+            {t('logout')}
+          </button>
+        </div>
       </header>
 
       <div className="dashboard-body">
         <section className="panel eligibility-panel">
-          <h2>Abone Sorgula</h2>
+          <h2>{t('queryOwnerHeading')}</h2>
           <form onSubmit={checkEligibility}>
             <input
-              placeholder="MSISDN (örn. 5551112233)"
+              placeholder={t('msisdnPlaceholder')}
               value={msisdn}
               onChange={(e) => setMsisdn(e.target.value)}
               required
             />
             <button type="submit" className="primary" disabled={eligibilityLoading}>
-              Sorgula
+              {t('query')}
             </button>
           </form>
           {eligibilityError && <p className="error">{eligibilityError}</p>}
           {eligibility && (
             <div className="eligibility-result">
-              <p><strong>MSISDN:</strong> {eligibility.msisdn}</p>
-              <p><strong>Tip:</strong> {eligibility.type}</p>
-              <p><strong>Durum:</strong> {eligibility.status}</p>
+              <p><strong>{t('msisdnLabel')}:</strong> {eligibility.msisdn}</p>
+              <p><strong>{t('typeLabel')}:</strong> {translateSegment(eligibility.type)}</p>
+              <p><strong>{t('statusLabel')}:</strong> {translateSubscriberStatus(eligibility.status)}</p>
             </div>
           )}
 
           {order && (
             <div className="order-progress">
-              <h3>Sipariş Takibi</h3>
+              <h3>{t('orderTrackingHeading')}</h3>
               <p className="order-id">{order.orderId}</p>
               <ol className="timeline">
                 {buildTimeline(order.status).map((step) => (
                   <li key={step.label} className={`timeline-${step.state}`}>
-                    {step.label}
+                    {translateStatus(step.label)}
                   </li>
                 ))}
               </ol>
-              {order.status === 'FAILED' && <p className="error">Başarısız: {order.reason}</p>}
-              {order.status === 'COMPLETED' && <p className="success">Sipariş tamamlandı, abonelik aktifleşti.</p>}
+              {order.status === 'FAILED' && (
+                <p className="error">
+                  {t('failedPrefix')}: {translateReason(order.reason)}
+                </p>
+              )}
+              {order.status === 'COMPLETED' && <p className="success">{t('orderCompletedMessage')}</p>}
             </div>
           )}
           {orderError && <p className="error">{orderError}</p>}
         </section>
 
         <section className="panel catalog-panel">
-          <h2>Ürün Kataloğu</h2>
+          <h2>{t('catalogHeading')}</h2>
           {productsError && <p className="error">{productsError}</p>}
           <div className="product-grid">
             {products.map((product) => (
               <div className="product-card" key={product.productCode}>
                 <h3>{product.name}</h3>
-                <p className="segment">{product.segment}</p>
+                <p className="segment">{translateSegment(product.segment)}</p>
                 <p className="code">{product.productCode}</p>
                 <button type="button" className="primary" onClick={() => placeOrder(product.productCode)}>
-                  Sipariş Ver
+                  {t('placeOrder')}
                 </button>
               </div>
             ))}
