@@ -5,6 +5,17 @@ import LanguageSwitcher from './LanguageSwitcher'
 
 const ORDER_STEPS = ['PENDING', 'VALIDATING', 'PROVISIONING', 'COMPLETED']
 const POLL_INTERVAL_MS = 2000
+const MSISDN_HISTORY_KEY = 'oms-slcm-msisdn-history'
+const MAX_MSISDN_HISTORY = 8
+
+function loadMsisdnHistory() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(MSISDN_HISTORY_KEY))
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
+}
 
 function getEligibilityHint(product, eligibility) {
   if (!eligibility) return null
@@ -36,6 +47,7 @@ export default function Dashboard({ onLogout }) {
     useLanguage()
 
   const [msisdn, setMsisdn] = useState('')
+  const [msisdnHistory, setMsisdnHistory] = useState(loadMsisdnHistory)
   const [eligibility, setEligibility] = useState(null)
   const [eligibilityError, setEligibilityError] = useState(null)
   const [eligibilityLoading, setEligibilityLoading] = useState(false)
@@ -55,11 +67,20 @@ export default function Dashboard({ onLogout }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  function rememberMsisdn(value) {
+    setMsisdnHistory((prev) => {
+      const next = [value, ...prev.filter((m) => m !== value)].slice(0, MAX_MSISDN_HISTORY)
+      localStorage.setItem(MSISDN_HISTORY_KEY, JSON.stringify(next))
+      return next
+    })
+  }
+
   async function checkEligibility(e) {
     e.preventDefault()
     setEligibilityError(null)
     setEligibility(null)
     setEligibilityLoading(true)
+    rememberMsisdn(msisdn)
     try {
       setEligibility(await api.getEligibility(msisdn))
     } catch (err) {
@@ -119,11 +140,17 @@ export default function Dashboard({ onLogout }) {
           <h2>{t('queryOwnerHeading')}</h2>
           <form onSubmit={checkEligibility}>
             <input
+              list="msisdn-history"
               placeholder={t('msisdnPlaceholder')}
               value={msisdn}
               onChange={(e) => setMsisdn(e.target.value)}
               required
             />
+            <datalist id="msisdn-history">
+              {msisdnHistory.map((m) => (
+                <option key={m} value={m} />
+              ))}
+            </datalist>
             <button type="submit" className="primary" disabled={eligibilityLoading}>
               {t('query')}
             </button>
