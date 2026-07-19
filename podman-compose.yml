@@ -21,6 +21,9 @@ services:
     build:
       context: ./frontend
     ports:
-      - "80:80"
+      # Host side is >=1024 on purpose: rootless Podman can't publish
+      # privileged host ports (<1024) without extra sysctl setup. Nginx
+      # still listens on 80 *inside* the container.
+      - "8081:80"
     depends_on:
       - backend

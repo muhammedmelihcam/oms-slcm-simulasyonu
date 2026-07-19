@@ -9,5 +9,9 @@ RUN npm run build
 # Runtime stage - just Nginx serving the static build + reverse-proxying /api.
 FROM nginx:alpine
 COPY --from=build /build/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# .template (not straight into conf.d/) + this env var: the image's own
+# entrypoint scripts run envsubst on it at container start, filling in
+# ${NGINX_LOCAL_RESOLVERS} from /etc/resolv.conf - see nginx.conf comment.
+COPY nginx.conf /etc/nginx/templates/default.conf.template
+ENV NGINX_ENTRYPOINT_LOCAL_RESOLVERS=1
 EXPOSE 80

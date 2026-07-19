@@ -73,11 +73,12 @@ podman-compose -f podman-compose.yml up --build
 ```
 
 - Backend: `http://localhost:8080`
-- Frontend: `http://localhost:80`
-- SQLite verisi `./backend/data/` dizinine (host bind mount) kalıcı olarak yazılır — konteyner yeniden başlatıldığında kaybolmaz.
+- Frontend: `http://localhost:8081` (host tarafında 80 değil 8081 — rootless Podman ayrıcalıklı `<1024` portları host'ta yayınlayamıyor; Nginx container içinde yine 80'de dinliyor)
+- SQLite verisi `./backend/data/` dizinine (host bind mount) kalıcı olarak yazılır — konteyner yeniden başlatıldığında kaybolmaz. Gerçek `podman restart` ile test edildi: aynı kullanıcı/sipariş verisi sağlam kalıyor.
 - JVM bellek/Hikari pool ayarları `podman-compose.yml`'de `JAVA_TOOL_OPTIONS` ile doğrudan verilir (standart env var yerine).
+- Nginx'in backend'e giden proxy'si `backend` servis adını her istekte yeniden çözer (`${NGINX_LOCAL_RESOLVERS}` + `resolver ... valid=10s`) — backend container'ı yeniden başlayıp IP değiştirse bile frontend'i ayrıca yeniden başlatmaya gerek kalmaz.
 
-> **Not**: Bu proje bu ortamda geliştirilirken makinede Podman/WSL2 kurulu değildi, bu yüzden `podman-compose up` gerçek bir build/run ile burada test edilemedi — `Containerfile`'lar ve bu compose dosyası dikkatle gözden geçirilerek yazıldı, ilk çalıştırmada küçük düzeltmeler gerekebilir.
+Bu kurulum gerçek `podman-compose up --build` ile uçtan uca test edildi (signup→signin→katalog→sipariş oluştur→polling→COMPLETED, ayrıca backend restart sonrası veri kalıcılığı ve proxy'nin kendiliğinden toparlanması dahil).
 
 ## Test
 
