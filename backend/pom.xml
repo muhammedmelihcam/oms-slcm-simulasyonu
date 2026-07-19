@@ -68,9 +68,28 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- Just the password hashing utility (BCryptPasswordEncoder), not the full
+             spring-boot-starter-security - that would auto-configure a filter chain
+             that locks down every endpoint by default, which we don't want here. -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-crypto</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- TestRestTemplate auto-prefers Apache HttpClient over the JDK's
+             HttpURLConnection when this is on the classpath. Needed because
+             HttpURLConnection throws a spurious "cannot retry due to server
+             authentication, in streaming mode" I/O error on a POST that gets
+             back 401 - a JDK quirk, not a real client/server bug. -->
+        <dependency>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
