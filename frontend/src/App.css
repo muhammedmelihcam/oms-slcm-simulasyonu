@@ -281,6 +281,21 @@ button.primary:disabled {
   color: var(--text);
 }
 
+.eligibility-hint {
+  font-size: 12px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.eligibility-hint.eligible {
+  color: #1a8a3d;
+}
+
+.eligibility-hint.not-eligible,
+.eligibility-hint.barred {
+  color: #d33;
+}
+
 /* Language switcher (TR/EN) - top-right on the auth page, in the dashboard
    header actions. Comes after .dashboard-header button in the stylesheet so
    it wins on equal selector specificity. */

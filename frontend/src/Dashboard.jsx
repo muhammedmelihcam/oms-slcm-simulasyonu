@@ -6,6 +6,15 @@ import LanguageSwitcher from './LanguageSwitcher'
 const ORDER_STEPS = ['PENDING', 'VALIDATING', 'PROVISIONING', 'COMPLETED']
 const POLL_INTERVAL_MS = 2000
 
+function getEligibilityHint(product, eligibility) {
+  if (!eligibility) return null
+  if (eligibility.status === 'BARRED') return { key: 'subscriberBarred', state: 'barred' }
+  if (product.segment === 'ALL' || product.segment === eligibility.type) {
+    return { key: 'eligibleForSubscriber', state: 'eligible' }
+  }
+  return { key: 'notEligibleForSubscriber', state: 'not-eligible' }
+}
+
 function buildTimeline(status) {
   if (status === 'FAILED') {
     return [
@@ -154,16 +163,20 @@ export default function Dashboard({ onLogout }) {
           <h2>{t('catalogHeading')}</h2>
           {productsError && <p className="error">{productsError}</p>}
           <div className="product-grid">
-            {products.map((product) => (
-              <div className="product-card" key={product.productCode}>
-                <h3>{product.name}</h3>
-                <p className="segment">{translateSegment(product.segment)}</p>
-                <p className="code">{product.productCode}</p>
-                <button type="button" className="primary" onClick={() => placeOrder(product.productCode)}>
-                  {t('placeOrder')}
-                </button>
-              </div>
-            ))}
+            {products.map((product) => {
+              const hint = getEligibilityHint(product, eligibility)
+              return (
+                <div className="product-card" key={product.productCode}>
+                  <h3>{product.name}</h3>
+                  <p className="segment">{translateSegment(product.segment)}</p>
+                  <p className="code">{product.productCode}</p>
+                  {hint && <p className={`eligibility-hint ${hint.state}`}>{t(hint.key)}</p>}
+                  <button type="button" className="primary" onClick={() => placeOrder(product.productCode)}>
+                    {t('placeOrder')}
+                  </button>
+                </div>
+              )
+            })}
           </div>
         </section>
       </div>

@@ -24,6 +24,9 @@ const translations = {
     catalogHeading: 'Ürün Kataloğu',
     placeOrder: 'Sipariş Ver',
     enterMsisdnFirst: 'Önce sol taraftan bir MSISDN girin.',
+    eligibleForSubscriber: '✓ Bu abone için uygun',
+    notEligibleForSubscriber: '✕ Bu abone için uygun değil',
+    subscriberBarred: '✕ MSISDN engelli, sipariş verilemez',
   },
   en: {
     appTitle: 'OMS/SLCM Simulation',
@@ -46,6 +49,9 @@ const translations = {
     catalogHeading: 'Product Catalog',
     placeOrder: 'Place Order',
     enterMsisdnFirst: 'Enter an MSISDN on the left first.',
+    eligibleForSubscriber: '✓ Eligible for this subscriber',
+    notEligibleForSubscriber: '✕ Not eligible for this subscriber',
+    subscriberBarred: '✕ MSISDN barred, cannot order',
   },
 }
 
