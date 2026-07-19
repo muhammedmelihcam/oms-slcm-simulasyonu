@@ -1,0 +1,26 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8080:8080"
+    environment:
+      DB_PATH: /app/data/oms_slcm.db
+      # JVM memory + Hikari pool limits applied directly via JAVA_TOOL_OPTIONS
+      # at the container-deployment level (this file), rather than through a
+      # custom app-specific env var that application.yml would have to read -
+      # per spec. The pool size is already 1 in application.yml (SQLite is
+      # single-writer); this makes that override explicit at deploy time too.
+      JAVA_TOOL_OPTIONS: "-Xms128m -Xmx256m -Dspring.datasource.hikari.maximum-pool-size=1"
+    volumes:
+      # Host bind mount, not an anonymous/named volume: the SQLite file must
+      # survive container restarts on a directory the host actually owns.
+      - ./backend/data:/app/data
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend

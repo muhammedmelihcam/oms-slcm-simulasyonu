@@ -1,0 +1,15 @@
+# Build stage - full Maven + JDK toolchain, discarded after the jar is produced.
+FROM maven:3.9-eclipse-temurin-17 AS build
+WORKDIR /build
+COPY pom.xml .
+COPY src ./src
+RUN mvn -q -B package -DskipTests
+
+# Runtime stage - just a JRE + the jar. Debian-based (not alpine): the SQLite
+# JDBC driver ships prebuilt native libraries per OS/libc, and glibc is the
+# safer bet for a driver we can't test the container build with here.
+FROM eclipse-temurin:17-jre-jammy
+WORKDIR /app
+COPY --from=build /build/target/*.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]
