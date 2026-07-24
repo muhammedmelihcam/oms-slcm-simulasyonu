@@ -3,3 +3,14 @@
 *.iml
 .DS_Store
 Thumbs.db
+
+# Kişisel çalışma notları - GitHub'a pushlanmaz, sadece yerelde kalır.
+durum.md
+task.md
+
+# Sunucuya SFTP ile aktarılacak imaj arşivleri - büyük binary dosyalar, git'e girmez.
+deploy-images/
+
+# Offline sunucu build'i için hazırlanan Maven bağımlılık önbelleği - ham klasör repoya girmez,
+# paketlenmiş .tar.gz Citrix'ten indirilebilsin diye bilinçli olarak commit'lenip pushlanıyor.
+backend/offline-m2/
