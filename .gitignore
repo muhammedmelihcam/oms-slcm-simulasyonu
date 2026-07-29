@@ -14,3 +14,8 @@ deploy-images/
 # Offline sunucu build'i için hazırlanan Maven bağımlılık önbelleği - ham klasör repoya girmez,
 # paketlenmiş .tar.gz Citrix'ten indirilebilsin diye bilinçli olarak commit'lenip pushlanıyor.
 backend/offline-m2/
+
+# Kapalı sunucu deploy'unda backend'in React'i kendi içinde servis etmesi için geçici olarak
+# gömülen frontend build çıktısı - ham klasör projenin normal (decoupled) mimarisini bozmasın
+# diye repoya girmez, paketlenmiş .tar.gz Citrix'e aktarilsin diye pushlanıyor.
+backend/src/main/resources/static/
