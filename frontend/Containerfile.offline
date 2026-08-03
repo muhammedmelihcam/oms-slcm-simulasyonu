@@ -1,8 +1,9 @@
 # Offline variant for the air-gapped corporate server: no Node build stage
 # (frontend/dist is pre-built locally and transferred in as a tarball), and
 # the nginx base image comes from a locally-loaded tar instead of Docker Hub.
+# Uses nginx.offline.conf (--network host, no envsubst/resolver needed) -
+# see that file's header comment for why.
 FROM localhost/nginx:alpine
 COPY dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/templates/default.conf.template
-ENV NGINX_ENTRYPOINT_LOCAL_RESOLVERS=1
-EXPOSE 80
+COPY nginx.offline.conf /etc/nginx/conf.d/default.conf
+EXPOSE 3000
