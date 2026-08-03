@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { api, setToken } from './api'
 import { useLanguage } from './i18n'
 import LanguageSwitcher from './LanguageSwitcher'
+import ThemeSwitcher from './ThemeSwitcher'
 
 export default function AuthPage({ onAuthenticated }) {
   const { t, translateApiMessage } = useLanguage()
@@ -31,7 +32,10 @@ export default function AuthPage({ onAuthenticated }) {
 
   return (
     <div className="auth-page">
-      <LanguageSwitcher />
+      <div className="auth-page-actions">
+        <ThemeSwitcher />
+        <LanguageSwitcher />
+      </div>
       <form className="auth-card" onSubmit={handleSubmit}>
         <h1>{t('appTitle')}</h1>
         <div className="auth-tabs">
