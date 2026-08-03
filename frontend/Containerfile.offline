@@ -7,9 +7,12 @@ FROM localhost/nginx:alpine
 # No subuid/subgid range is configured for the rootless user on the target
 # server, so nginx can't chown its cache dirs to the "nginx" user (uid 101)
 # it would normally drop worker processes to - that chown fails with EINVAL
-# at startup. Dropping the "user" directive keeps master+workers on the
-# container's own (already unprivileged, namespaced) uid, so no chown needed.
-RUN sed -i '/^user /d' /etc/nginx/nginx.conf
+# at startup. Deleting the "user" directive isn't enough: this nginx build
+# has "nginx" baked in as its compile-time default user, so it still tries
+# the chown even with no directive present. Pointing it at root explicitly
+# keeps master+workers on the container's own (already unprivileged,
+# namespaced) uid, so no cross-uid chown is attempted at all.
+RUN sed -i 's/^user .*/user root;/' /etc/nginx/nginx.conf
 COPY dist /usr/share/nginx/html
 COPY nginx.offline.conf /etc/nginx/conf.d/default.conf
 EXPOSE 3000
