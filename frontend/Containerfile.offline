@@ -1,0 +1,8 @@
+# Offline variant for the air-gapped corporate server: no Node build stage
+# (frontend/dist is pre-built locally and transferred in as a tarball), and
+# the nginx base image comes from a locally-loaded tar instead of Docker Hub.
+FROM localhost/nginx:alpine
+COPY dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/templates/default.conf.template
+ENV NGINX_ENTRYPOINT_LOCAL_RESOLVERS=1
+EXPOSE 80
