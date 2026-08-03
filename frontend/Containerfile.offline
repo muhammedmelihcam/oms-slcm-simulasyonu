@@ -4,6 +4,12 @@
 # Uses nginx.offline.conf (--network host, no envsubst/resolver needed) -
 # see that file's header comment for why.
 FROM localhost/nginx:alpine
+# No subuid/subgid range is configured for the rootless user on the target
+# server, so nginx can't chown its cache dirs to the "nginx" user (uid 101)
+# it would normally drop worker processes to - that chown fails with EINVAL
+# at startup. Dropping the "user" directive keeps master+workers on the
+# container's own (already unprivileged, namespaced) uid, so no chown needed.
+RUN sed -i '/^user /d' /etc/nginx/nginx.conf
 COPY dist /usr/share/nginx/html
 COPY nginx.offline.conf /etc/nginx/conf.d/default.conf
 EXPOSE 3000
