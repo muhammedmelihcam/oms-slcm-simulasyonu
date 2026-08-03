@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { api, clearToken } from './api'
 import { useLanguage } from './i18n'
 import LanguageSwitcher from './LanguageSwitcher'
+import ThemeSwitcher from './ThemeSwitcher'
 
 const ORDER_STEPS = ['PENDING', 'VALIDATING', 'PROVISIONING', 'COMPLETED']
 const POLL_INTERVAL_MS = 2000
@@ -43,7 +44,7 @@ function buildTimeline(status) {
 }
 
 export default function Dashboard({ onLogout }) {
-  const { t, translateStatus, translateSegment, translateSubscriberStatus, translateReason, translateApiMessage } =
+  const { lang, t, translateStatus, translateSegment, translateSubscriberStatus, translateReason, translateApiMessage } =
     useLanguage()
 
   const [msisdn, setMsisdn] = useState('')
@@ -51,6 +52,9 @@ export default function Dashboard({ onLogout }) {
   const [eligibility, setEligibility] = useState(null)
   const [eligibilityError, setEligibilityError] = useState(null)
   const [eligibilityLoading, setEligibilityLoading] = useState(false)
+
+  const [activeSubscriptions, setActiveSubscriptions] = useState([])
+  const [activeSubscriptionsError, setActiveSubscriptionsError] = useState(null)
 
   const [products, setProducts] = useState([])
   const [productsError, setProductsError] = useState(null)
@@ -75,14 +79,26 @@ export default function Dashboard({ onLogout }) {
     })
   }
 
+  async function loadActiveSubscriptions(forMsisdn) {
+    try {
+      setActiveSubscriptions(await api.listActiveSubscriptions(forMsisdn))
+      setActiveSubscriptionsError(null)
+    } catch (err) {
+      setActiveSubscriptionsError(translateApiMessage(err.message))
+    }
+  }
+
   async function checkEligibility(e) {
     e.preventDefault()
     setEligibilityError(null)
     setEligibility(null)
+    setActiveSubscriptions([])
+    setActiveSubscriptionsError(null)
     setEligibilityLoading(true)
     rememberMsisdn(msisdn)
     try {
       setEligibility(await api.getEligibility(msisdn))
+      loadActiveSubscriptions(msisdn)
     } catch (err) {
       setEligibilityError(translateApiMessage(err.message))
     } finally {
@@ -106,6 +122,7 @@ export default function Dashboard({ onLogout }) {
           setOrder(updated)
           if (updated.status === 'COMPLETED' || updated.status === 'FAILED') {
             clearInterval(pollRef.current)
+            if (updated.status === 'COMPLETED') loadActiveSubscriptions(msisdn)
           }
         } catch (err) {
           clearInterval(pollRef.current)
@@ -128,6 +145,7 @@ export default function Dashboard({ onLogout }) {
       <header className="dashboard-header">
         <h1>{t('appTitle')}</h1>
         <div className="dashboard-header-actions">
+          <ThemeSwitcher />
           <LanguageSwitcher />
           <button type="button" onClick={handleLogout}>
             {t('logout')}
@@ -161,6 +179,28 @@ export default function Dashboard({ onLogout }) {
               <p><strong>{t('msisdnLabel')}:</strong> {eligibility.msisdn}</p>
               <p><strong>{t('typeLabel')}:</strong> {translateSegment(eligibility.type)}</p>
               <p><strong>{t('statusLabel')}:</strong> {translateSubscriberStatus(eligibility.status)}</p>
+            </div>
+          )}
+
+          {eligibility && (
+            <div className="active-subscriptions">
+              <h3>{t('activeSubscriptionsHeading')}</h3>
+              {activeSubscriptionsError && <p className="error">{activeSubscriptionsError}</p>}
+              {!activeSubscriptionsError && activeSubscriptions.length === 0 && (
+                <p className="muted">{t('noActiveSubscriptions')}</p>
+              )}
+              {activeSubscriptions.length > 0 && (
+                <ul className="subscription-list">
+                  {activeSubscriptions.map((sub) => (
+                    <li key={sub.productCode}>
+                      <span className="subscription-name">{sub.productName}</span>
+                      <span className="subscription-date">
+                        {new Date(sub.activatedAt).toLocaleDateString(lang === 'tr' ? 'tr-TR' : 'en-US')}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           )}
 

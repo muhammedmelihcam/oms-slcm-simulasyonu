@@ -27,6 +27,8 @@ const translations = {
     eligibleForSubscriber: '✓ Bu abone için uygun',
     notEligibleForSubscriber: '✕ Bu abone için uygun değil',
     subscriberBarred: '✕ MSISDN engelli, sipariş verilemez',
+    activeSubscriptionsHeading: 'Aktif Abonelikler',
+    noActiveSubscriptions: 'Aktif abonelik yok.',
   },
   en: {
     appTitle: 'OMS/SLCM Simulation',
@@ -52,6 +54,8 @@ const translations = {
     eligibleForSubscriber: '✓ Eligible for this subscriber',
     notEligibleForSubscriber: '✕ Not eligible for this subscriber',
     subscriberBarred: '✕ MSISDN barred, cannot order',
+    activeSubscriptionsHeading: 'Active Subscriptions',
+    noActiveSubscriptions: 'No active subscriptions.',
   },
 }
 

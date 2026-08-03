@@ -54,6 +54,7 @@ export const api = {
   signin: (email, password) => request('/auth/signin', { method: 'POST', body: { email, password }, auth: false }),
   listProducts: () => request('/catalog/products'),
   getEligibility: (msisdn) => request(`/eligibility/${encodeURIComponent(msisdn)}`),
+  listActiveSubscriptions: (msisdn) => request(`/subscriptions/${encodeURIComponent(msisdn)}`),
   createOrder: (msisdn, productCode) => request('/orders', { method: 'POST', body: { msisdn, productCode } }),
   getOrder: (orderId) => request(`/orders/${encodeURIComponent(orderId)}`),
 }
